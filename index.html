@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Walkability Atlas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+
+<div style="
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: sans-serif;
+  z-index: 1000;
+  width: 270px;
+  max-height: 95vh;
+  overflow-y: auto;
+">
+  <!-- 📝 Description -->
+  <div style="font-size: 13px; line-height: 1.4;">
+    This webmap shows four layers:
+    <ul style="padding-left: 18px; margin: 4px 0;">
+      <li>Walkability at <b>NUTS3</b> regions</li>
+      <li>Walkability at <b>LAU</b> units</li>
+      <li>Walkability for <b>20 most populated cities</b> in Europe</li>
+      <li><b>Degree of Urbanization</b> for those cities</li>
+    </ul>
+    More information:
+    <br>
+    <a href="https://arxiv.org/abs/2504.17897" target="_blank">arXiv paper</a> |
+    <a href="https://github.com/ohheynish/walkability-obct" target="_blank">GitHub</a>
+  </div>
+
+  <!-- 🎛️ Opacity Controls -->
+  <label style="font-size: 14px; display: flex; flex-direction: column;">
+    OSM Opacity
+    <input type="range" id="osm-opacity" min="0" max="1" step="0.1" value="1">
+  </label>
+  <label style="font-size: 14px; display: flex; flex-direction: column;">
+    Satellite Opacity
+    <input type="range" id="satellite-opacity" min="0" max="1" step="0.1" value="1">
+  </label>
+  <label style="font-size: 14px; display: flex; flex-direction: column;">
+    Walkability (NUTS3)
+    <input type="range" id="nuts3-opacity" min="0" max="1" step="0.1" value="1">
+  </label>
+  <label style="font-size: 14px; display: flex; flex-direction: column;">
+    Walkability (LAU)
+    <input type="range" id="lau-opacity" min="0" max="1" step="0.1" value="1">
+  </label>
+  <label style="font-size: 14px; display: flex; flex-direction: column;">
+    Walkability (Cities)
+    <input type="range" id="cities-walk-opacity" min="0" max="1" step="0.1" value="1">
+  </label>
+  <label style="font-size: 14px; display: flex; flex-direction: column;">
+    Urbanization (Cities)
+    <input type="range" id="cities-dou-opacity" min="0" max="1" step="0.1" value="1">
+  </label>
+
+  <!-- 🔍 Search -->
+  <div style="display: flex; gap: 8px;">
+    <input
+      type="text"
+      id="searchBox"
+      placeholder="Search for a city..."
+      style="flex: 1; padding: 6px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;"
+    />
+    <button
+      id="searchBtn"
+      style="padding: 6px 12px; border: none; background-color: #1E90FF; color: white; border-radius: 6px; font-weight: bold; cursor: pointer;"
+    >
+      Search
+    </button>
+  </div>
+
+  <!-- 🗺️ Legends -->
+ <div style="font-size: 13px;">
+  <strong>Legend – Walkability Decile</strong>
+  <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+    <div><span style="display:inline-block;width:12px;height:12px;background:#d73027;border:1px solid #999;margin-right:6px;"></span>1</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#f46d43;border:1px solid #999;margin-right:6px;"></span>2</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#fdae61;border:1px solid #999;margin-right:6px;"></span>3</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#fee08b;border:1px solid #999;margin-right:6px;"></span>4</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#ffffbf;border:1px solid #999;margin-right:6px;"></span>5</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#d9ef8b;border:1px solid #999;margin-right:6px;"></span>6</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#a6d96a;border:1px solid #999;margin-right:6px;"></span>7</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#66bd63;border:1px solid #999;margin-right:6px;"></span>8</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#1a9850;border:1px solid #999;margin-right:6px;"></span>9</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#006837;border:1px solid #999;margin-right:6px;"></span>10</div>
+  </div>
+</div>
+
+
+<div style="font-size: 13px; margin-top: 12px;">
+  <strong>Legend – Degree of Urbanization</strong>
+  <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+    <div><span style="display:inline-block;width:12px;height:12px;background:#cdf57a;border:1px solid #999;margin-right:6px;"></span>Very low density rural (11)</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#abcd66;border:1px solid #999;margin-right:6px;"></span>Low density rural (12)</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#375623;border:1px solid #999;margin-right:6px;"></span>Rural cluster (13)</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#ffff00;border:1px solid #999;margin-right:6px;"></span>Suburban or peri-urban (21)</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#a87000;border:1px solid #999;margin-right:6px;"></span>Semi-dense urban cluster (22)</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#732600;border:1px solid #999;margin-right:6px;"></span>Dense urban cluster (23)</div>
+    <div><span style="display:inline-block;width:12px;height:12px;background:#ff0000;border:1px solid #999;margin-right:6px;"></span>Urban centre (30)</div>
+  </div>
+</div>
+</div>
+
+ <!-- Map Container -->
+  <div id="map" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+
+    <!-- Your bundled JavaScript -->
+    <script src="dist/bundle.js"></script>
+  </body>
+</html>
