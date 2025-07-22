@@ -107,7 +107,7 @@ const map = new maplibregl.Map({
   zoom: 2
 });
 
-// 🔹 Interactions
+// Interactions
 map.on("click", (e) => {
   const zoom = map.getZoom();
 
@@ -157,23 +157,36 @@ map.on("click", (e) => {
     .addTo(map);
 });
 
-// 🔹 Opacity Sliders
-const sliderBindings = [
-  { id: "osm-opacity", layer: "osm-layer", prop: "raster-opacity" },
-  { id: "satellite-opacity", layer: "satellite-layer", prop: "raster-opacity" },
-  { id: "lau-opacity", layer: "lau-walk-fill", prop: "fill-opacity" },
-  { id: "cities-walk-opacity", layer: "cities-walk-fill", prop: "fill-opacity" },
-  { id: "cities-dou-opacity", layer: "cities-dou-fill", prop: "fill-opacity" },
-  { id: "nuts3-opacity", layer: "nuts3-walk-fill", prop: "fill-opacity" }
+// toggles & sliders
+const layerControls = [
+  { id: "osm", layer: "osm-layer", prop: "raster-opacity" },
+  { id: "satellite", layer: "satellite-layer", prop: "raster-opacity" },
+  { id: "lau", layer: "lau-walk-fill", prop: "fill-opacity" },
+  { id: "cities-walk", layer: "cities-walk-fill", prop: "fill-opacity" },
+  { id: "cities-dou", layer: "cities-dou-fill", prop: "fill-opacity" },
+  { id: "nuts3", layer: "nuts3-walk-fill", prop: "fill-opacity" }
 ];
 
-sliderBindings.forEach(({ id, layer, prop }) => {
-  document.getElementById(id).addEventListener("input", (e) => {
-    map.setPaintProperty(layer, prop, parseFloat(e.target.value));
-  });
+layerControls.forEach(({ id, layer, prop }) => {
+  const opacitySlider = document.getElementById(`${id}-opacity`);
+  const toggleCheckbox = document.getElementById(`${id}-toggle`);
+
+  if (opacitySlider) {
+    opacitySlider.addEventListener("input", (e) => {
+      const value = parseFloat(e.target.value);
+      map.setPaintProperty(layer, prop, value);
+    });
+  }
+
+  if (toggleCheckbox) {
+    toggleCheckbox.addEventListener("change", (e) => {
+      const visible = e.target.checked;
+      map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
+    });
+  }
 });
 
-// 🔹 Search
+// search
 document.getElementById("searchBtn").addEventListener("click", async () => {
   const query = document.getElementById("searchBox").value;
   if (!query) return;
